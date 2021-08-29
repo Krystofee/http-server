@@ -62,8 +62,6 @@ int init_http_request(int conn_fd, struct http_request_t *request)
         header_end++;
     }
 
-    printf("end char [%d] %d\n", buffer[header_end], header_end);
-
     return err;
 }
 
