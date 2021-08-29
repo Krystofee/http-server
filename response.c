@@ -54,7 +54,7 @@ int set_http_response_body(struct http_response_t *response, char *body, long bo
 int render_http_response(struct http_response_t *response, char **result, int *result_length)
 {
     int err = 0;
-    char *rendered = malloc(sizeof(char) * 1024 * 1024 * 128);
+    char *rendered = malloc(sizeof(char) * (MAX_HTTP_HEADER_COUNT * MAX_HTTP_HEADER_LENGTH + response->body_length));
     *result_length = 0;
 
     strcpy(rendered, "HTTP/1.1 200 OK\n");
