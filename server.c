@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
@@ -96,6 +97,7 @@ int server_accept(struct server_t *server)
     return_error(err, "close");
 
     destroy_http_request(&request);
+    free(rendered_response);
 
     return err;
 }
