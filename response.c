@@ -35,15 +35,15 @@ int add_http_response_header(struct http_response_t *response, char *key, char *
     return 0;
 }
 
-int set_http_response_body(struct http_response_t *response, char *body)
+int set_http_response_body(struct http_response_t *response, char *body, long body_length)
 {
-    response->body_length = strlen(body);
+    response->body_length = body_length;
     response->body = malloc(sizeof(char) * response->body_length);
     memset(response->body, 0, sizeof(char) * response->body_length);
 
     char body_length_str[32];
     memset(body_length_str, 0, 32);
-    sprintf(body_length_str, "%d", response->body_length);
+    sprintf(body_length_str, "%ld", response->body_length);
     add_http_response_header(response, "Content-Length", body_length_str);
 
     memcpy(response->body, body, response->body_length);
@@ -54,7 +54,8 @@ int set_http_response_body(struct http_response_t *response, char *body)
 int render_http_response(struct http_response_t *response, char **result, int *result_length)
 {
     int err = 0;
-    char *rendered = malloc(sizeof(char) * 2048);
+    char *rendered = malloc(sizeof(char) * 1024 * 1024 * 128);
+    *result_length = 0;
 
     strcpy(rendered, "HTTP/1.1 200 OK\n");
 
@@ -64,16 +65,18 @@ int render_http_response(struct http_response_t *response, char **result, int *r
         strncat(rendered, h->key, strlen(h->key));
         strncat(rendered, ": ", 2);
         strncat(rendered, h->value, strlen(h->value));
-        strncat(rendered, "\n", 1);
+        strncat(rendered, "\r\n", 2);
     }
 
-    strncat(rendered, "\n", sizeof("\n"));
-    strncat(rendered, response->body, response->body_length);
+    strncat(rendered, "\r\n", sizeof("\r\n"));
 
-    printf("rendered: %s\n", rendered);
+    *result_length = strlen(rendered) + response->body_length;
+
+    memcpy(&rendered[strlen(rendered)], response->body, response->body_length);
+
+    printf("rendered: %s (%d)\n", rendered, *result_length);
 
     *result = rendered;
-    *result_length = strlen(rendered);
 
     return err;
 }

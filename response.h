@@ -17,13 +17,13 @@ struct http_response_t
 
     // Body
     char *body;
-    int body_length;
+    long body_length;
 } http_response_t;
 
 int init_http_response(struct http_response_t *response, struct http_request_t *request);
 int render_http_response(struct http_response_t *response, char **rendered, int *rendered_length);
 
 int add_http_response_header(struct http_response_t *response, char *key, char *value);
-int set_http_response_body(struct http_response_t *response, char *body);
+int set_http_response_body(struct http_response_t *response, char *body, long body_length);
 
 #endif

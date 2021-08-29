@@ -1,14 +1,43 @@
 <html>
   <head>
-    <title>test</title>
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
+
+    <title>test</title>
   </head>
-  <body>
-    <h1>Koupacka</h1>
-    <div>
-      <img src="/koupacka.jpg" alt="koupacka" />
+
+  <body class="w-full h-full bg-gray-100">
+    <div class="flex items-center justify-center">
+      <div
+        class="
+          flex
+          items-center
+          justify-center
+          m-12
+          p-6
+          bg-white
+          shadow
+          rounded-lg
+        "
+      >
+        <div>
+          <div class="font-extrabold text-2xl">Nejaky dalsi content</div>
+          <div class="mt-1 text-gray-500">
+            Nwejaky velky obrazek, jakoze to funguje a nesegfaultuje :)
+          </div>
+          <div class="mt-1">
+            <img src="koupacka.jpg" alt="koupacka" loading="lazy" />
+          </div>
+          <div class="mt-6">
+            <a class="font-medium text-indigo-700" href="/">zpet</a>
+          </div>
+        </div>
+      </div>
     </div>
-    <a href="/">back</a>
   </body>
 </html>

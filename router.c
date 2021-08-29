@@ -27,25 +27,25 @@ int serve_static(struct http_response_t *response, char *path)
     strcat(full_path, WEB_BASE_PATH);
     strcat(full_path, path);
 
-    char *buffer = 0;
+    // // determine file open mode based on extension
+    // char *open_mode = 0;
+    // int full_path_length = strlen(full_path);
+    // if (strcmp(&full_path[full_path_length - 4], ".jpg") == 0 || strcmp(&full_path[full_path_length - 4], ".png") == 0)
+    // {
+    //     open_mode = "rb";
+    //     add_http_response_header(response, "Content-Type", "image/png");
+    // }
+    // else
+    // {
+    //     open_mode = "r";
+    // }
+
+    printf("loading static file %s\n", full_path);
+    // add_http_response_header(response, "Content-Type", "image/png");
+
+    char *buffer = NULL;
     long length;
-
-    char *open_mode = 0;
-
-    // determine file open mode based on extension
-    int full_path_length = strlen(full_path);
-    if (strcmp(&full_path[full_path_length - 3], "jpg") == 0)
-    {
-        open_mode = "rb";
-    }
-    else
-    {
-        open_mode = "r";
-    }
-
-    printf("loading static file %s (%s)\n", full_path, open_mode);
-
-    FILE *f = fopen(full_path, open_mode);
+    FILE *f = fopen(full_path, "rb");
 
     if (f)
     {
@@ -53,13 +53,14 @@ int serve_static(struct http_response_t *response, char *path)
         length = ftell(f);
         fseek(f, 0, SEEK_SET);
         buffer = malloc(length);
-        if (buffer)
-        {
-            fread(buffer, 1, length, f);
-        }
+        fread(buffer, 1, length, f);
         fclose(f);
 
-        set_http_response_body(response, buffer);
+        printf("file: %s (%ld)\n", buffer, length);
+
+        set_http_response_body(response, buffer, length);
+
+        free(buffer);
         // add_http_response_header(response, "Content-Type", "html");
     }
 

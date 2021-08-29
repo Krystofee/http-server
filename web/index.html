@@ -1,14 +1,52 @@
 <html>
   <head>
-    <title>test</title>
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
+
+    <title>test</title>
   </head>
-  <body>
-    <h1>Nazdar!</h1>
-    <div>Serviruju staticke soubory vlastnim webovym serverem. Cool, ne?</div>
-    <div style="margin-top: 1rem">
-      <a href="/second_page.html">Druha strana</a>
+  <body class="w-full h-full bg-gray-100">
+    <div class="flex items-center justify-center">
+      <div
+        class="
+          flex
+          items-center
+          justify-center
+          m-12
+          p-6
+          bg-white
+          shadow
+          rounded-lg
+        "
+      >
+        <div>
+          <div class="font-extrabold text-2xl">Nazdar!</div>
+          <div class="mt-1 text-gray-500">
+            Serviruju staticke soubory vlastnim webovym serverem. Cool, ne?
+          </div>
+          <div class="mt-6">
+            <a
+              class="
+                text-white
+                font-medium
+                text-sm
+                bg-indigo-600
+                hover:bg-indigo-800
+                rounded
+                px-3
+                py-2
+              "
+              href="/second_page.html"
+              >Druha strana</a
+            >
+          </div>
+        </div>
+      </div>
     </div>
   </body>
 </html>
