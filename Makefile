@@ -1,5 +1,5 @@
 server:
-	clang -o server server.c request.c response.c router.c utils.c
+	clang -o server server.c request.c response.c router.c utils.c -fsanitize=undefined
 
 run:
 	./server
