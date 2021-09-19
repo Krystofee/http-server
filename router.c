@@ -1,57 +1,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
+#include <regex.h>
 
 #include "response.h"
 #include "request.h"
 #include "router.h"
 #include "mimetypes.h"
 
+// Import views
+#include "views/serve_static.h"
+#include "views/index.h"
+
 int process_request(struct http_response_t *response, struct http_request_t *request)
 {
-    if (strcmp(request->address, "/") == 0)
-    {
-        serve_static(response, "/index.html");
-    }
-    else
-    {
-        serve_static(response, request->address);
-    }
-
-    return 0;
-}
-
-int serve_static(struct http_response_t *response, char *path)
-{
-    char full_path[256];
-    memset(full_path, 0, 256);
-    strcat(full_path, WEB_BASE_PATH);
-    strcat(full_path, path);
-
-    char *buffer = NULL;
-    long length;
-    FILE *f = fopen(full_path, "rb");
-
-    if (f)
-    {
-        response->status_code = 200;
-
-        fseek(f, 0, SEEK_END);
-        length = ftell(f);
-        fseek(f, 0, SEEK_SET);
-        buffer = malloc(length);
-        fread(buffer, 1, length, f);
-        fclose(f);
-
-        add_http_response_header(response, "Content-Type", guess_mimetype(full_path));
-        set_http_response_body(response, buffer, length);
-
-        free(buffer);
-    }
-    else
-    {
-        response->status_code = 404;
-    }
+    view_serve_static(response, request);
 
     return 0;
 }
@@ -67,6 +30,8 @@ int extend_router_capacity(router_t *router)
     {
         router->paths = realloc(router->paths, sizeof(registered_view_t) * router->paths_capacity);
     }
+
+    return 0;
 }
 
 int init_router(router_t *router)
@@ -75,9 +40,14 @@ int init_router(router_t *router)
     router->paths_capacity = 0;
     extend_router_capacity(router);
 
-    register_view(router, "/index.html", &serve_static);
-    register_view(router, "/form.html", &serve_static);
-    register_view(router, "/second_page.html", &serve_static);
+    register_view(router, "^/$", &view_index);
+    register_view(router, "^/index.html$", &view_index);
+    register_view(router, "^/form.html$", &view_serve_static);
+    register_view(router, "^/second_page.html$", &view_serve_static);
+
+    register_view(router, "^/static/.*$", &view_serve_static);
+
+    return 0;
 }
 
 int register_view(router_t *router, char *path, view_t view)
@@ -88,4 +58,6 @@ int register_view(router_t *router, char *path, view_t view)
     router->paths[router->paths_count].path = path;
     router->paths[router->paths_count].view = view;
     router->paths_count++;
+
+    return 0;
 }

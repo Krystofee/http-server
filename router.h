@@ -3,10 +3,7 @@
 
 #include "request.h"
 #include "response.h"
-
-#define WEB_BASE_PATH "./web"
-
-typedef int (*view_t)(struct http_response_t *response, struct http_request_t *request);
+#include "views/types.h"
 
 typedef struct registered_view
 {
