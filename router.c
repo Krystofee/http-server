@@ -5,6 +5,7 @@
 #include "response.h"
 #include "request.h"
 #include "router.h"
+#include "mimetypes.h"
 
 int process_request(struct http_response_t *response, struct http_request_t *request)
 {
@@ -27,28 +28,14 @@ int serve_static(struct http_response_t *response, char *path)
     strcat(full_path, WEB_BASE_PATH);
     strcat(full_path, path);
 
-    // // determine file open mode based on extension
-    // char *open_mode = 0;
-    // int full_path_length = strlen(full_path);
-    // if (strcmp(&full_path[full_path_length - 4], ".jpg") == 0 || strcmp(&full_path[full_path_length - 4], ".png") == 0)
-    // {
-    //     open_mode = "rb";
-    //     add_http_response_header(response, "Content-Type", "image/png");
-    // }
-    // else
-    // {
-    //     open_mode = "r";
-    // }
-
-    printf("loading static file %s\n", full_path);
-    // add_http_response_header(response, "Content-Type", "image/png");
-
     char *buffer = NULL;
     long length;
     FILE *f = fopen(full_path, "rb");
 
     if (f)
     {
+        response->status_code = 200;
+
         fseek(f, 0, SEEK_END);
         length = ftell(f);
         fseek(f, 0, SEEK_SET);
@@ -56,13 +43,49 @@ int serve_static(struct http_response_t *response, char *path)
         fread(buffer, 1, length, f);
         fclose(f);
 
-        printf("file: %s (%ld)\n", buffer, length);
-
+        add_http_response_header(response, "Content-Type", guess_mimetype(full_path));
         set_http_response_body(response, buffer, length);
 
         free(buffer);
-        // add_http_response_header(response, "Content-Type", "html");
+    }
+    else
+    {
+        response->status_code = 404;
     }
 
     return 0;
+}
+
+int extend_router_capacity(router_t *router)
+{
+    router->paths_capacity += 100;
+    if (router->paths == NULL)
+    {
+        router->paths = malloc(sizeof(registered_view_t) * router->paths_capacity);
+    }
+    else
+    {
+        router->paths = realloc(router->paths, sizeof(registered_view_t) * router->paths_capacity);
+    }
+}
+
+int init_router(router_t *router)
+{
+    router->paths_count = 0;
+    router->paths_capacity = 0;
+    extend_router_capacity(router);
+
+    register_view(router, "/index.html", &serve_static);
+    register_view(router, "/form.html", &serve_static);
+    register_view(router, "/second_page.html", &serve_static);
+}
+
+int register_view(router_t *router, char *path, view_t view)
+{
+    if (router->paths_capacity <= router->paths_count)
+        extend_router_capacity(router);
+
+    router->paths[router->paths_count].path = path;
+    router->paths[router->paths_count].view = view;
+    router->paths_count++;
 }

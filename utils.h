@@ -12,7 +12,11 @@
 // Protocols
 #define HTTP_PROTOCOL_HTTP_1 (1)
 
-int get_method_code(char *str);
+int method_to_code(char *str);
+char *code_to_method(int code);
+
 int get_protocol_code(char *str);
+
+char *int_to_string(long int n, char *result, int result_length);
 
 #endif

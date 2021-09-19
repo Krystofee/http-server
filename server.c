@@ -72,23 +72,16 @@ int server_accept(struct server_t *server)
 
     struct http_request_t request = {0};
     init_http_request(conn_fd, &request);
-    // prepare response
 
+    printf("\n");
+
+    // prepare response
     struct http_response_t response;
     init_http_response(&response, &request);
 
     char *rendered_response;
     int rendered_response_length;
     render_http_response(&response, &rendered_response, &rendered_response_length);
-
-    // const char *reply =
-    //     "HTTP/1.1 200 OK\n"
-    //     "Server: TyKokos/0.0.1\n"
-    //     "Content-Type: text/html\n"
-    //     "Content-Length: 78\n"
-    //     "Connection: close\n"
-    //     "\n"
-    //     "<html><head><title>test</title></head><body>Hello world of HTML!</body></html>";
 
     err = send(conn_fd, rendered_response, rendered_response_length, 0);
     return_error(err, "send");
@@ -98,6 +91,8 @@ int server_accept(struct server_t *server)
 
     destroy_http_request(&request);
     free(rendered_response);
+
+    printf("\n");
 
     return err;
 }
@@ -143,11 +138,11 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    int process_id = 0;
-    err = (process_id = fork());
+    int listener_process_id = 0;
+    err = (listener_process_id = fork());
     return_error(err, "fork");
 
-    if (process_id == 0)
+    if (listener_process_id == 0)
     {
         // Parent process
 
@@ -157,7 +152,8 @@ int main(int argc, char const *argv[])
             if (sig_flag)
             {
                 printf("Shutting down (interrupt)\n");
-                kill(process_id, SIGTERM);
+                kill(listener_process_id, SIGKILL);
+                server_destroy(&server);
                 break;
             }
         }
@@ -167,8 +163,6 @@ int main(int argc, char const *argv[])
         // Child process
         server_serve(&server);
     }
-
-    server_destroy(&server);
 
     return 0;
 }

@@ -5,6 +5,7 @@
 
 #include "response.h"
 #include "router.h"
+#include "status_codes.h"
 
 int init_http_response(struct http_response_t *response, struct http_request_t *request)
 {
@@ -43,7 +44,7 @@ int set_http_response_body(struct http_response_t *response, char *body, long bo
 
     char body_length_str[32];
     memset(body_length_str, 0, 32);
-    sprintf(body_length_str, "%ld", response->body_length);
+    int_to_string(response->body_length, body_length_str, 32);
     add_http_response_header(response, "Content-Length", body_length_str);
 
     memcpy(response->body, body, response->body_length);
@@ -57,7 +58,19 @@ int render_http_response(struct http_response_t *response, char **result, int *r
     char *rendered = malloc(sizeof(char) * (MAX_HTTP_HEADER_COUNT * MAX_HTTP_HEADER_LENGTH + response->body_length));
     *result_length = 0;
 
-    strcpy(rendered, "HTTP/1.1 200 OK\n");
+    // Protocol
+    strcat(rendered, "HTTP/1.1 ");
+    // Status code
+    char status_code_str[3];
+    memset(status_code_str, 0, 3);
+    int_to_string(response->status_code, status_code_str, 3);
+    strcat(rendered, status_code_str);
+    strcat(rendered, " ");
+    // Description
+    strcat(rendered, get_status_code_description(response->status_code));
+    strcat(rendered, "\n");
+
+    printf("< %s %s %s\n", "HTTP/1.1", status_code_str, get_status_code_description(response->status_code));
 
     for (int i = 0; i < response->header_count; ++i)
     {
@@ -66,6 +79,8 @@ int render_http_response(struct http_response_t *response, char **result, int *r
         strncat(rendered, ": ", 2);
         strncat(rendered, h->value, strlen(h->value));
         strncat(rendered, "\r\n", 2);
+
+        printf("< %s=%s\n", h->key, h->value);
     }
 
     strncat(rendered, "\r\n", sizeof("\r\n"));
@@ -74,7 +89,12 @@ int render_http_response(struct http_response_t *response, char **result, int *r
 
     memcpy(&rendered[strlen(rendered)], response->body, response->body_length);
 
-    printf("rendered: %s (%d)\n", rendered, *result_length);
+    if (response->body_length > 0)
+    {
+        printf("< Body:\n");
+        printf("%s\n", response->body);
+        printf("< BODY END\n");
+    }
 
     *result = rendered;
 

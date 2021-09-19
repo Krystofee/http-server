@@ -6,6 +6,7 @@
 
 #include "macros.h"
 #include "request.h"
+#include "debug.h"
 
 int init_http_request(int conn_fd, struct http_request_t *request)
 {
@@ -19,7 +20,8 @@ int init_http_request(int conn_fd, struct http_request_t *request)
     err = recv(conn_fd, buffer, MAX_HTTP_REQUEST_LENGTH, 0);
     return_error(err, "recv");
 
-    printf("\n%s\n", buffer);
+    // debug("Request", "%s", buffer);
+    // printf("\n%s\n", buffer);
 
     char line_buffer[MAX_HTTP_HEADER_LENGTH];
 
@@ -51,7 +53,9 @@ int init_http_request(int conn_fd, struct http_request_t *request)
                     char *body_ptr = malloc(sizeof(char) * request->body_length);
                     memcpy(body_ptr, &buffer[header_end + 1], request->body_length);
                     request->body = body_ptr;
-                    printf("body: %s (%d)\n", request->body, request->body_length);
+                    printf("> Body:\n");
+                    printf("%s\n", request->body);
+                    printf("> BODY END\n");
                 }
             }
 
@@ -93,7 +97,7 @@ int read_http_request_starting_line(struct http_request_t *request, char *line_b
             switch (word_c)
             {
             case 0:
-                request->method = get_method_code(word_buffer);
+                request->method = method_to_code(word_buffer);
                 break;
             case 1:
                 memcpy(&request->address, &line_buffer[i_start], i_end - i_start);
@@ -109,7 +113,7 @@ int read_http_request_starting_line(struct http_request_t *request, char *line_b
         i_end++;
     }
 
-    printf("request: %d %s %d\n", request->method, request->address, request->protocol);
+    printf("> %s %s %d\n", code_to_method(request->method), request->address, request->protocol);
 
     return err;
 }
@@ -129,7 +133,7 @@ int add_http_request_header(struct http_request_t *request, char *line_buffer, i
         {
             memcpy((char *)header_ptr->key, &line_buffer[0], i_end);
             memcpy((char *)header_ptr->value, &line_buffer[i_end + 2], line_length - i_end + 1);
-            printf("header: %s=%s\n", header_ptr->key, header_ptr->value);
+            printf("> %s=%s\n", header_ptr->key, header_ptr->value);
             request->header_count++;
             break;
         }

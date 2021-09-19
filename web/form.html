@@ -1,0 +1,96 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+
+    <title>test</title>
+  </head>
+
+  <body class="w-full h-full bg-gray-100">
+    <div class="flex items-center justify-center">
+      <div
+        class="
+          flex
+          items-center
+          justify-center
+          m-12
+          p-6
+          bg-white
+          shadow
+          rounded-lg
+        "
+      >
+        <div class="min-w-screen-lg">
+          <form method="POST">
+            <div class="flex flex-col gap-4">
+              <h1 class="font-bold text-lg">Přihlašte se</h1>
+              <input
+                type="text"
+                name="email"
+                id="email"
+                required
+                class="
+                  px-3
+                  py-2
+                  rounded-md
+                  border border-gray-300
+                  shadow-sm
+                  focus:outline-none
+                  focus:ring-1
+                  focus:ring-indigo-500
+                  focus:border-indigo-500
+                  block
+                  w-full
+                  sm:text-sm
+                "
+                placeholder="you@example.com"
+              />
+              <input
+                required
+                class="
+                  px-3
+                  py-2
+                  rounded-md
+                  border border-gray-300
+                  shadow-sm
+                  focus:outline-none
+                  focus:ring-1
+                  focus:ring-indigo-500
+                  focus:border-indigo-500
+                  block
+                  w-full
+                  sm:text-sm
+                "
+                type="password"
+                name="password"
+                placeholder="********"
+              />
+              <div>
+                <button
+                  type="submit"
+                  class="
+                    text-white
+                    font-medium
+                    text-sm
+                    bg-indigo-600
+                    hover:bg-indigo-800
+                    rounded
+                    px-3
+                    py-2
+                  "
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

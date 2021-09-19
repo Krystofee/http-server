@@ -1,8 +1,9 @@
 #include <memory.h>
+#include <stdio.h>
 
 #include "utils.h"
 
-int get_method_code(char *str)
+int method_to_code(char *str)
 {
     if (strcmp(str, "GET") == 0)
     {
@@ -37,6 +38,41 @@ int get_method_code(char *str)
     return -1;
 }
 
+char *code_to_method(int code)
+{
+    if (code == HTTP_METHOD_GET)
+    {
+        return "GET";
+    }
+
+    if (code == HTTP_METHOD_POST)
+    {
+        return "POST";
+    }
+
+    if (code == HTTP_METHOD_PUT)
+    {
+        return "PUT";
+    }
+
+    if (code == HTTP_METHOD_PATCH)
+    {
+        return "PATCH";
+    }
+
+    if (code == HTTP_METHOD_OPTIONS)
+    {
+        return "OPTIONS";
+    }
+
+    if (code == HTTP_METHOD_HEAD)
+    {
+        return "HEAD";
+    }
+
+    return "[error method]";
+}
+
 int get_protocol_code(char *str)
 {
     if (strcmp(str, "HTTP/1.1") == 0)
@@ -45,4 +81,11 @@ int get_protocol_code(char *str)
     }
 
     return -1;
+}
+
+char *int_to_string(long int n, char *result, int result_length)
+{
+    memset(result, 0, result_length);
+    sprintf(result, "%ld", n);
+    return result;
 }
