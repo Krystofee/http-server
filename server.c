@@ -10,16 +10,19 @@
 #include "macros.h"
 #include "request.h"
 #include "response.h"
+#include "router.h"
 
 #define PORT (8080)
 
 #define BACKLOG (10)
 #define REQUEST_DATA_BUFFER_SIZE (1024)
 
-struct server_t
+typedef struct server
 {
     int socket_fd;
-};
+
+    router_t router;
+} server_t;
 
 volatile sig_atomic_t sig_flag = 0;
 
@@ -36,7 +39,14 @@ int prepare_env()
     return 0;
 }
 
-int server_listen(struct server_t *server)
+int server_init(server_t *server)
+{
+    init_router(&server->router);
+
+    return 0;
+}
+
+int server_listen(server_t *server)
 {
     int err = 0;
 
@@ -58,7 +68,7 @@ int server_listen(struct server_t *server)
     return 0;
 }
 
-int server_accept(struct server_t *server)
+int server_accept(server_t *server)
 {
     int err = 0;
     int conn_fd;
@@ -97,7 +107,7 @@ int server_accept(struct server_t *server)
     return err;
 }
 
-int server_serve(struct server_t *server)
+int server_serve(server_t *server)
 {
     int err = 0;
 
@@ -114,11 +124,13 @@ int server_serve(struct server_t *server)
     return err;
 }
 
-int server_destroy(struct server_t *server)
+int server_destroy(server_t *server)
 {
     int err = 0;
 
     err = shutdown(server->socket_fd, SHUT_RDWR);
+
+    destroy_router(&server->router);
 
     return 0;
 }
@@ -128,9 +140,10 @@ int main(int argc, char const *argv[])
     printf("Server on 0.0.0.0:%d\n", PORT);
 
     int err = 0;
-    struct server_t server = {0};
+    server_t server = {0};
 
     prepare_env();
+    server_init(&server); // handle errors
     err = server_listen(&server);
     if (err)
     {
