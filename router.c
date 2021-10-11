@@ -3,6 +3,7 @@
 #include <memory.h>
 #include <regex.h>
 
+#include "server.h"
 #include "response.h"
 #include "request.h"
 #include "router.h"
@@ -12,37 +13,40 @@
 #include "views/serve_static.h"
 #include "views/index.h"
 
-int process_request(struct http_response_t *response, struct http_request_t *request)
+int process_request(server_t *server, struct http_response_t *response, struct http_request_t *request)
 {
-    view_serve_static(response, request);
+    // view_serve_static(response, request);
 
     // Pattern matching in path
 
     int max_groups = 16;
     regmatch_t group_array[max_groups];
 
-    char *current_path = "/static/address.html";
-
-    int match = regexec(path_regex, current_path, max_groups, group_array, 0);
-
-    printf("match %d (%d)\n", match, REG_NOMATCH);
-
-    if (match == 0)
+    for (int i = 0; i < server->router.paths_count; ++i)
     {
-        for (int i = 1; i < max_groups; ++i)
+        char *current_path = request->address;
+        struct registered_view current_view = server->router.paths[i];
+
+        int match = regexec(current_view.path, request->address, max_groups, group_array, 0);
+        printf("match %s ? match=%d regnomatch=%d\n", request->address, match, REG_NOMATCH);
+
+        if (match == 0)
         {
-            if (group_array[i].rm_so == -1)
-                break;
+            for (int i = 1; i < max_groups; ++i)
+            {
+                if (group_array[i].rm_so == -1)
+                    break;
 
-            char match_str[256];
-            memset(match_str, 0, 256);
-            strncpy(match_str, current_path + group_array[i].rm_so, group_array[i].rm_eo - group_array[i].rm_so);
+                char match_str[256];
+                memset(match_str, 0, 256);
+                strncpy(match_str, current_path + group_array[i].rm_so, group_array[i].rm_eo - group_array[i].rm_so);
 
-            printf("- %s\n", match_str);
+                printf("MATCH - %s\n", match_str);
+            }
+
+            return current_view.view(response, request);
         }
     }
-
-    // ^^^^^^^ Pattern matching in path
 
     return 0;
 }
@@ -68,11 +72,13 @@ int init_router(router_t *router)
     router->paths_capacity = 0;
     extend_router_capacity(router);
 
+    // User defined routes
     register_view(router, "^/$", &view_index);
     register_view(router, "^/index.html$", &view_index);
     register_view(router, "^/form.html$", &view_serve_static);
     register_view(router, "^/second_page.html$", &view_serve_static);
 
+    // Serve static files
     register_view(router, "^/static/(.*)$", &view_serve_static);
 
     return 0;

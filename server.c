@@ -7,22 +7,11 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+#include "server.h"
 #include "macros.h"
 #include "request.h"
 #include "response.h"
 #include "router.h"
-
-#define PORT (8080)
-
-#define BACKLOG (10)
-#define REQUEST_DATA_BUFFER_SIZE (1024)
-
-typedef struct server
-{
-    int socket_fd;
-
-    router_t router;
-} server_t;
 
 volatile sig_atomic_t sig_flag = 0;
 
@@ -85,9 +74,12 @@ int server_accept(server_t *server)
 
     printf("\n");
 
-    // prepare response
+    // Prepare response
     struct http_response_t response;
     init_http_response(&response, &request);
+
+    // Process request by view
+    process_request(server, &response, &request);
 
     char *rendered_response;
     int rendered_response_length;

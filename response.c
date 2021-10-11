@@ -20,8 +20,6 @@ int init_http_response(struct http_response_t *response, struct http_request_t *
     gettimeofday(&tv, NULL);
     response->timestamp = tv.tv_usec;
 
-    process_request(response, request);
-
     return err;
 }
 
